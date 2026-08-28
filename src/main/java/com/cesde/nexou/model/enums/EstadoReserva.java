@@ -1,5 +1,8 @@
 package com.cesde.nexou.model.enums;
 
-public class EstadoReserva {
-    
+public enum EstadoReserva {
+    ACTIVA,
+    DEVUELTO,
+    VENCIDO,
+    CANCELADA
 }
