@@ -22,6 +22,9 @@ public class RenovacionService {
         if (reserva.getEstadoReserva() != EstadoReserva.ACTIVA) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo reservas activas se pueden renovar");
         }
+        if (diasExtra == null || diasExtra <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los días extra deben ser positivos");
+        }
         if (diasExtra > 10) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No puede renovar por más de 10 días extras");
         }

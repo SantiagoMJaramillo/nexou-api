@@ -1,9 +1,7 @@
 package com.cesde.nexou.controller;
 
-import com.cesde.nexou.dto.request.RenovarLibroRequest;
 import com.cesde.nexou.service.RenovacionService;
 import com.cesde.nexou.service.ValidacionGlobalService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +15,8 @@ public class GestionAvanzadaController {
 
     // Endpoint para renovar libros
     @PatchMapping("/reservas-libros/{id}/renovar")
-    public ResponseEntity<String> renovar(@PathVariable Long id, @Valid @RequestBody RenovarLibroRequest request) {
-        return ResponseEntity.ok(renovacionService.renovarLibro(id, request.getDiasExtra()));
+    public ResponseEntity<String> renovar(@PathVariable Long id, @RequestParam Integer diasExtra) {
+        return ResponseEntity.ok(renovacionService.renovarLibro(id, diasExtra));
     }
 
     // Endpoint de prueba para el validador
