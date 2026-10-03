@@ -49,11 +49,12 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>3.1.1</version>
 		</dependency>
-		<!-- Visor moderno Scalar para la documentación -->
+		<!-- Visor moderno Scalar (/scalar). El starter de springdoc es el compatible con Spring Boot 4;
+		     com.scalar.maven:scalar-webmvc 0.6.x no se activa en Boot 4 (devuelve 404) -->
 		<dependency>
-			<groupId>com.scalar.maven</groupId>
-			<artifactId>scalar-webmvc</artifactId>
-			<version>0.6.74</version>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-scalar</artifactId>
+			<version>3.1.1</version>
 		</dependency>
 
 		<dependency>
