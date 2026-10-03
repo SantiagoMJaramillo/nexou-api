@@ -15,6 +15,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class ReservaEquipoService {
     private final UsuarioRepository usuarioRepository;
+    private final ValidacionGlobalService validacionGlobalService;
     private final EquipoTecnologicoRepository equipoRepository;
     private final ReservaEquipoRepository reservaRepository;
 
@@ -22,6 +23,8 @@ public class ReservaEquipoService {
     public ReservaEquipoResponse crear(CrearReservaEquipoRequest request) {
         Usuario usuario = usuarioRepository.findByIdAndEstadoActivoTrue(request.getUsuarioId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario inactivo o no encontrado con id: " + request.getUsuarioId()));
+        // Regla de negocio: máximo 3 reservas activas por usuario (libros + equipos)
+        validacionGlobalService.validarLimiteGlobal(usuario.getId());
         EquipoTecnologico equipo = equipoRepository.findById(request.getEquipoId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Equipo no encontrado con id: " + request.getEquipoId()));
 

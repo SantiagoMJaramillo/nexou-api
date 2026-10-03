@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class ReservaLibroService {
     private final UsuarioRepository usuarioRepository;
+    private final ValidacionGlobalService validacionGlobalService;
     private final LibroRepository libroRepository;
     private final ReservaLibroRepository reservaLibroRepository;
 
@@ -22,6 +23,8 @@ public class ReservaLibroService {
     public ReservaLibroResponse crear(CrearReservaLibroRequest request) {
         Usuario usuario = usuarioRepository.findByIdAndEstadoActivoTrue(request.getUsuarioId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario inactivo o no encontrado con id: " + request.getUsuarioId()));
+        // Regla de negocio: máximo 3 reservas activas por usuario (libros + equipos)
+        validacionGlobalService.validarLimiteGlobal(usuario.getId());
         Libro libro = libroRepository.findById(request.getLibroId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con id: " + request.getLibroId()));
 
