@@ -1,6 +1,8 @@
 package com.cesde.nexou.model.entity;
 
 import com.cesde.nexou.model.base.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +21,8 @@ public class Usuario extends BaseEntity {
     @Column(nullable = false, unique = true, length = 150)
     private String correo;
 
+    // Solo se recibe en las peticiones; nunca se devuelve en las respuestas JSON
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false, length = 255)
     private String contrasena;
 
@@ -34,5 +38,6 @@ public class Usuario extends BaseEntity {
     private String telefono;
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("usuario")
     private ConfiguracionUsuario configuracionUsuario;
 }

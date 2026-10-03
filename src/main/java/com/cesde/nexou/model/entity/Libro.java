@@ -2,6 +2,7 @@ package com.cesde.nexou.model.entity;
 
 import com.cesde.nexou.model.base.BaseEntity;
 import com.cesde.nexou.model.embeddable.Ubicacion;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,6 +43,7 @@ public class Libro extends BaseEntity {
     private Ubicacion ubicacionFisica;
 
     @ManyToMany
+    @JsonIgnoreProperties("libros")
     @JoinTable(
         name = "libro_categoria",
         joinColumns = @JoinColumn(name = "libro_id"),

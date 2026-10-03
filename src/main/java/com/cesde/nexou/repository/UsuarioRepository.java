@@ -5,4 +5,7 @@ import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByIdAndEstadoActivoTrue(Long id);
+
+    // Método personalizado: buscar un usuario por su correo institucional
+    Optional<Usuario> findByCorreo(String correo);
 }
