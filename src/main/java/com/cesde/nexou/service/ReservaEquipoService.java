@@ -28,9 +28,13 @@ public class ReservaEquipoService {
         if (equipo.getCantidadDisponible() == null || equipo.getCantidadDisponible() <= 0) {
             throw new ReglaDeNegocioException("El equipo '" + equipo.getNomEquipo() + "' no tiene unidades disponibles");
         }
-        Duration duracion = Duration.between(request.getHoraInicio(), request.getHoraFin());
-        if (duracion.toHours() > equipo.getDuracionMaximaHrs()) {
-            throw new ReglaDeNegocioException("Supera la duración máxima del equipo");
+        if (!request.getHoraFin().isAfter(request.getHoraInicio())) {
+            throw new ReglaDeNegocioException("La hora de fin debe ser posterior a la hora de inicio");
+        }
+        // Se compara en minutos: toHours() trunca (2h59m contaría como 2h)
+        long minutos = Duration.between(request.getHoraInicio(), request.getHoraFin()).toMinutes();
+        if (equipo.getDuracionMaximaHrs() != null && minutos > equipo.getDuracionMaximaHrs() * 60) {
+            throw new ReglaDeNegocioException("La reserva supera la duración máxima del equipo (" + equipo.getDuracionMaximaHrs() + " h)");
         }
 
         ReservaEquipo reserva = new ReservaEquipo();
