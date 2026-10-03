@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReservaLibroRepository extends JpaRepository<ReservaLibro, Long> {
     long countByUsuarioIdAndEstadoReserva(Long usuarioId, EstadoReserva estadoReserva);
+
+    boolean existsByUsuarioId(Long usuarioId);
 }
