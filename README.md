@@ -126,3 +126,28 @@ Todas las excepciones se convierten en JSON con el formato `{"mensaje": "..."}` 
 ```
 
 Requiere Java 21 y variables de entorno `DB_URL`, `DB_USER`, `DB_PASSWORD` para la conexión a PostgreSQL.
+
+## Cómo ejecutar y probar
+
+1. Configure las variables de entorno con una base de datos PostgreSQL **vacía**; la seed solo corre si no hay usuarios.
+
+   PowerShell (Windows):
+   ```powershell
+   $env:DB_URL="jdbc:postgresql://<host>/<base>?sslmode=require"
+   $env:DB_USER="<usuario>"
+   $env:DB_PASSWORD="<contraseña>"
+   .\mvnw.cmd spring-boot:run
+   ```
+   Linux / macOS: `export DB_URL=...` (igual para `DB_USER` y `DB_PASSWORD`) y luego `./mvnw spring-boot:run`.
+
+2. En la consola debe aparecer `>>> SEED EXITOSA`.
+3. Abra http://localhost:8080/scalar para explorar y probar los endpoints, o importe `postman_collection.json` en Postman.
+4. Pruebas automáticas: con la API corriendo, en otra terminal ejecute
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts\smoke-test.ps1
+   ```
+   El script verifica la documentación, los datos de la seed, el CRUD de las 7 entidades, los métodos personalizados, las reglas de negocio, los errores `{"mensaje"}` y CORS. Al final muestra `RESULTADO: N/N pruebas OK`. Limpia los datos temporales que crea, así que se puede repetir.
+
+## Integración continua
+
+`.github/workflows/ci.yml` se ejecuta en cada push y en cada Pull Request: compila, corre los tests, levanta la API contra un PostgreSQL temporal y ejecuta `scripts/smoke-test.ps1`. Si algo falla, el detalle aparece como anotación en la pestaña **Checks** del PR.
