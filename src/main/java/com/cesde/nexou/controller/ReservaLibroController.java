@@ -18,4 +18,9 @@ public class ReservaLibroController {
     public ResponseEntity<ReservaLibroResponse> crear(@Valid @RequestBody CrearReservaLibroRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(request));
     }
+
+    @PatchMapping("/{id}/devolucion")
+    public ResponseEntity<ReservaLibroResponse> devolver(@PathVariable Long id) {
+        return ResponseEntity.ok(service.devolver(id));
+    }
 }
