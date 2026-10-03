@@ -1,5 +1,6 @@
 package com.cesde.nexou.service;
 import com.cesde.nexou.dto.request.CrearReservaLibroRequest;
+import com.cesde.nexou.dto.request.RenovarLibroRequest;
 import com.cesde.nexou.dto.response.ReservaLibroResponse;
 import com.cesde.nexou.exception.RecursoNoEncontradoException;
 import com.cesde.nexou.exception.ReglaDeNegocioException;
@@ -18,6 +19,8 @@ public class ReservaLibroService {
     private final ValidacionGlobalService validacionGlobalService;
     private final LibroRepository libroRepository;
     private final ReservaLibroRepository reservaLibroRepository;
+
+    private static final int MAX_DIAS_RENOVACION = 10;
 
     @Transactional
     public ReservaLibroResponse crear(CrearReservaLibroRequest request) {
@@ -59,6 +62,20 @@ public class ReservaLibroService {
         Libro libro = reserva.getLibro();
         libro.setCantidadDisponible(libro.getCantidadDisponible() + 1);
         libroRepository.save(libro);
+        return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
+    }
+
+    @Transactional
+    public ReservaLibroResponse renovar(Long reservaId, RenovarLibroRequest request) {
+        ReservaLibro reserva = reservaLibroRepository.findById(reservaId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Reserva de libro no encontrada con id: " + reservaId));
+        if (reserva.getEstadoReserva() != EstadoReserva.ACTIVA) {
+            throw new ReglaDeNegocioException("Solo las reservas activas se pueden renovar");
+        }
+        if (request.getDiasExtra() > MAX_DIAS_RENOVACION) {
+            throw new ReglaDeNegocioException("No se puede renovar por más de " + MAX_DIAS_RENOVACION + " días extra");
+        }
+        reserva.setFechaEntregaEsperada(reserva.getFechaEntregaEsperada().plusDays(request.getDiasExtra()));
         return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
     }
 }
