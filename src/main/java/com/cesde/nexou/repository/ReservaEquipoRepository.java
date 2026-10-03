@@ -8,4 +8,6 @@ public interface ReservaEquipoRepository extends JpaRepository<ReservaEquipo, Lo
     long countByUsuarioIdAndEstadoReserva(Long usuarioId, EstadoReserva estadoReserva);
 
     boolean existsByUsuarioId(Long usuarioId);
+
+    boolean existsByEquipoId(Long equipoId);
 }
