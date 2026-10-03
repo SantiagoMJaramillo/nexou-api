@@ -1,0 +1,82 @@
+name: CI
+
+# Compila, ejecuta los tests, levanta la API contra PostgreSQL y corre las pruebas de humo.
+on:
+  push:
+    branches: [ main, develop, "feature/**" ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-y-pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nexou_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Crear base de datos para los tests
+        run: PGPASSWORD=postgres createdb -h localhost -U postgres nexou_test
+
+      - name: Compilar y ejecutar tests (mvnw verify)
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/nexou_test
+        run: ./mvnw -B verify
+
+      - name: Levantar la API (base de datos vacía, se ejecuta la seed)
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/nexou_db
+        run: |
+          nohup java -jar target/nexou-*.jar > app.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/v3/api-docs > /dev/null; then
+              echo "API arriba despues de $((i*2)) segundos"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "La API no arranco a tiempo"
+          cat app.log
+          exit 1
+
+      - name: Verificar que la seed se ejecutó
+        run: grep "SEED EXITOSA" app.log
+
+      - name: Pruebas de humo de la API
+        shell: pwsh
+        run: ./scripts/smoke-test.ps1 -BaseUrl http://localhost:8080
+
+      - name: Log de la aplicación
+        if: always()
+        run: |
+          if [ -f app.log ]; then
+            grep -E "ERROR|Exception|SEED|Started" app.log | head -100 || true
+          fi
