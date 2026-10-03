@@ -24,7 +24,9 @@ public class ConfiguracionUsuario extends BaseEntity {
     private Boolean notificacionesActivas = true;
 
     @OneToOne
-    @JsonIgnoreProperties("configuracionUsuario")
+    // allowSetters: solo se ignora al serializar. Si se ignora en ambos lados al deserializar,
+    // Jackson 3 falla con "No _valueDeserializer assigned" al recibir {"usuario": {"id": 1}}
+    @JsonIgnoreProperties(value = "configuracionUsuario", allowSetters = true)
     @JoinColumn(name = "usuario_id", nullable = false, unique = true)
     private Usuario usuario;
 }
