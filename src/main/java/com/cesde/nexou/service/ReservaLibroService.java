@@ -1,4 +1,5 @@
 package com.cesde.nexou.service;
+import com.cesde.nexou.dto.request.ActualizarReservaLibroRequest;
 import com.cesde.nexou.dto.request.CrearReservaLibroRequest;
 import com.cesde.nexou.dto.request.RenovarLibroRequest;
 import com.cesde.nexou.dto.response.ReservaLibroResponse;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,14 @@ public class ReservaLibroService {
     private final ReservaLibroRepository reservaLibroRepository;
 
     private static final int MAX_DIAS_RENOVACION = 10;
+
+    public List<ReservaLibroResponse> obtenerTodos() {
+        return reservaLibroRepository.findAll().stream().map(ReservaLibroResponse::desde).toList();
+    }
+
+    public ReservaLibroResponse obtenerPorId(Long id) {
+        return ReservaLibroResponse.desde(buscarReserva(id));
+    }
 
     @Transactional
     public ReservaLibroResponse crear(CrearReservaLibroRequest request) {
@@ -77,5 +87,36 @@ public class ReservaLibroService {
         }
         reserva.setFechaEntregaEsperada(reserva.getFechaEntregaEsperada().plusDays(request.getDiasExtra()));
         return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
+    }
+
+    @Transactional
+    public ReservaLibroResponse actualizar(Long id, ActualizarReservaLibroRequest request) {
+        ReservaLibro reserva = buscarReserva(id);
+        reserva.setTipoPrestamo(request.getTipoPrestamo());
+        reserva.setProposito(request.getProposito());
+        return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        ReservaLibro reserva = buscarReserva(id);
+        // Regla de negocio: una reserva activa tiene el ejemplar prestado; primero debe devolverse
+        if (reserva.getEstadoReserva() == EstadoReserva.ACTIVA) {
+            throw new ReglaDeNegocioException("No se puede eliminar una reserva activa. Registre primero la devolución");
+        }
+        reservaLibroRepository.delete(reserva);
+    }
+
+    // Uso del método personalizado del repositorio
+    public List<ReservaLibroResponse> obtenerPorUsuarioId(Long usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new RecursoNoEncontradoException("Usuario no encontrado con id: " + usuarioId);
+        }
+        return reservaLibroRepository.findByUsuarioId(usuarioId).stream().map(ReservaLibroResponse::desde).toList();
+    }
+
+    private ReservaLibro buscarReserva(Long id) {
+        return reservaLibroRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Reserva de libro no encontrada con id: " + id));
     }
 }
