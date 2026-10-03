@@ -8,4 +8,6 @@ public interface ReservaLibroRepository extends JpaRepository<ReservaLibro, Long
     long countByUsuarioIdAndEstadoReserva(Long usuarioId, EstadoReserva estadoReserva);
 
     boolean existsByUsuarioId(Long usuarioId);
+
+    boolean existsByLibroId(Long libroId);
 }
