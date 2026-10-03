@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -39,6 +40,14 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
         Map<String, String> respuesta = new HashMap<>();
         respuesta.put("mensaje", "Datos inválidos - " + detalle);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
+    }
+
+    // JSON mal formado o con tipos incorrectos (por ejemplo, texto donde va un número o una fecha inválida)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> manejarJsonInvalido(HttpMessageNotReadableException ex) {
+        Map<String, String> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "El cuerpo de la petición no es un JSON válido o tiene tipos de datos incorrectos");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
     }
 }
