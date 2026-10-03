@@ -1,4 +1,5 @@
 package com.cesde.nexou.service;
+import com.cesde.nexou.dto.request.ActualizarReservaEquipoRequest;
 import com.cesde.nexou.dto.request.CrearReservaEquipoRequest;
 import com.cesde.nexou.dto.response.ReservaEquipoResponse;
 import com.cesde.nexou.exception.RecursoNoEncontradoException;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +20,14 @@ public class ReservaEquipoService {
     private final ValidacionGlobalService validacionGlobalService;
     private final EquipoTecnologicoRepository equipoRepository;
     private final ReservaEquipoRepository reservaRepository;
+
+    public List<ReservaEquipoResponse> obtenerTodos() {
+        return reservaRepository.findAll().stream().map(ReservaEquipoResponse::desde).toList();
+    }
+
+    public ReservaEquipoResponse obtenerPorId(Long id) {
+        return ReservaEquipoResponse.desde(buscarReserva(id));
+    }
 
     @Transactional
     public ReservaEquipoResponse crear(CrearReservaEquipoRequest request) {
@@ -65,5 +75,36 @@ public class ReservaEquipoService {
         equipo.setCantidadDisponible(equipo.getCantidadDisponible() + 1);
         equipoRepository.save(equipo);
         return ReservaEquipoResponse.desde(reservaRepository.save(reserva));
+    }
+
+    @Transactional
+    public ReservaEquipoResponse actualizar(Long id, ActualizarReservaEquipoRequest request) {
+        ReservaEquipo reserva = buscarReserva(id);
+        reserva.setLugarEntrega(request.getLugarEntrega());
+        reserva.setProposito(request.getProposito());
+        return ReservaEquipoResponse.desde(reservaRepository.save(reserva));
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        ReservaEquipo reserva = buscarReserva(id);
+        // Regla de negocio: una reserva activa tiene el equipo prestado; primero debe devolverse
+        if (reserva.getEstadoReserva() == EstadoReserva.ACTIVA) {
+            throw new ReglaDeNegocioException("No se puede eliminar una reserva activa. Registre primero la devolución");
+        }
+        reservaRepository.delete(reserva);
+    }
+
+    // Uso del método personalizado del repositorio
+    public List<ReservaEquipoResponse> obtenerPorUsuarioId(Long usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new RecursoNoEncontradoException("Usuario no encontrado con id: " + usuarioId);
+        }
+        return reservaRepository.findByUsuarioId(usuarioId).stream().map(ReservaEquipoResponse::desde).toList();
+    }
+
+    private ReservaEquipo buscarReserva(Long id) {
+        return reservaRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Reserva de equipo no encontrada con id: " + id));
     }
 }
