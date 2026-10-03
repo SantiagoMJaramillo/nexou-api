@@ -1,6 +1,7 @@
 package com.cesde.nexou.model.entity;
 
 import com.cesde.nexou.model.base.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,5 +24,6 @@ public class Categoria extends BaseEntity {
     private String descripcion;
 
     @ManyToMany(mappedBy = "categorias")
+    @JsonIgnoreProperties("categorias")
     private Set<Libro> libros = new HashSet<>();
 }
