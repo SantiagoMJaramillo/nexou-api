@@ -16,3 +16,19 @@
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+
+server:
+  port: ${PORT:8080}
+
+# Configuración de OpenAPI (SpringDoc)
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# Configuración de Scalar API Reference
+scalar:
+  enabled: true
+  url: /v3/api-docs
+  path: /scalar
