@@ -1,5 +1,6 @@
 package com.cesde.nexou.controller;
 import com.cesde.nexou.dto.request.CrearReservaLibroRequest;
+import com.cesde.nexou.dto.request.RenovarLibroRequest;
 import com.cesde.nexou.dto.response.ReservaLibroResponse;
 import com.cesde.nexou.service.ReservaLibroService;
 import jakarta.validation.Valid;
@@ -22,5 +23,10 @@ public class ReservaLibroController {
     @PatchMapping("/{id}/devolucion")
     public ResponseEntity<ReservaLibroResponse> devolver(@PathVariable Long id) {
         return ResponseEntity.ok(service.devolver(id));
+    }
+
+    @PatchMapping("/{id}/renovacion")
+    public ResponseEntity<ReservaLibroResponse> renovar(@PathVariable Long id, @Valid @RequestBody RenovarLibroRequest request) {
+        return ResponseEntity.ok(service.renovar(id, request));
     }
 }
