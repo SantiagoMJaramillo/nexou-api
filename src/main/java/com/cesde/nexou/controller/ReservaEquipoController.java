@@ -1,7 +1,5 @@
 package com.cesde.nexou.controller;
-import com.cesde.nexou.dto.request.ActualizarReservaEquipoRequest;
-import com.cesde.nexou.dto.request.CrearReservaEquipoRequest;
-import com.cesde.nexou.dto.response.ReservaEquipoResponse;
+import com.cesde.nexou.model.entity.ReservaEquipo;
 import com.cesde.nexou.service.ReservaEquipoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,25 +20,25 @@ public class ReservaEquipoController {
 
     @Operation(summary = "Listar todas las reservas de equipos")
     @GetMapping
-    public List<ReservaEquipoResponse> obtenerTodos() {
+    public List<ReservaEquipo> obtenerTodos() {
         return service.obtenerTodos();
     }
 
     @Operation(summary = "Obtener una reserva de equipo por su ID")
     @GetMapping("/{id}")
-    public ResponseEntity<ReservaEquipoResponse> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<ReservaEquipo> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.obtenerPorId(id));
     }
 
     @Operation(summary = "Prestar un equipo", description = "Valida usuario activo, stock, horario, duración máxima y el límite de 3 reservas activas")
     @PostMapping
-    public ResponseEntity<ReservaEquipoResponse> crear(@Valid @RequestBody CrearReservaEquipoRequest request) {
+    public ResponseEntity<ReservaEquipo> crear(@Valid @RequestBody ReservaEquipo request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(request));
     }
 
     @Operation(summary = "Actualizar lugar de entrega y propósito de una reserva")
     @PutMapping("/{id}")
-    public ResponseEntity<ReservaEquipoResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ActualizarReservaEquipoRequest request) {
+    public ResponseEntity<ReservaEquipo> actualizar(@PathVariable Long id, @Valid @RequestBody ReservaEquipo request) {
         return ResponseEntity.ok(service.actualizar(id, request));
     }
 
@@ -54,13 +52,13 @@ public class ReservaEquipoController {
     // Método personalizado: reservas de equipos de un usuario
     @Operation(summary = "Listar las reservas de equipos de un usuario")
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<ReservaEquipoResponse>> obtenerPorUsuarioId(@PathVariable Long usuarioId) {
+    public ResponseEntity<List<ReservaEquipo>> obtenerPorUsuarioId(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(service.obtenerPorUsuarioId(usuarioId));
     }
 
     @Operation(summary = "Registrar la devolución de un equipo")
     @PatchMapping("/{id}/devolucion")
-    public ResponseEntity<ReservaEquipoResponse> devolver(@PathVariable Long id) {
+    public ResponseEntity<ReservaEquipo> devolver(@PathVariable Long id) {
         return ResponseEntity.ok(service.devolver(id));
     }
 }
