@@ -63,7 +63,7 @@ function Test-Condicion {
         $script:Pasaron++
         Write-Host "  [OK]    $Nombre" -ForegroundColor Green
     } else {
-        $script:Fallaron.Add($Nombre)
+        $script:Fallaron.Add("$Nombre  $Detalle")
         Write-Host "  [FALLA] $Nombre  $Detalle" -ForegroundColor Red
     }
 }
@@ -297,5 +297,10 @@ if ($script:Fallaron.Count -eq 0) {
 } else {
     Write-Host "RESULTADO: $($script:Fallaron.Count) de $total pruebas fallaron:" -ForegroundColor Red
     $script:Fallaron | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
+    if ($env:GITHUB_ACTIONS -eq "true") {
+        # Anotación visible en la pestaña Checks del PR
+        $texto = ($script:Fallaron -join "`n").Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+        Write-Host "::error title=Pruebas de humo ($($script:Fallaron.Count) fallas)::$texto"
+    }
     exit 1
 }
