@@ -39,4 +39,20 @@ public class ReservaLibroService {
         libroRepository.save(libro);
         return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
     }
+
+    @Transactional
+    public ReservaLibroResponse devolver(Long reservaId) {
+        ReservaLibro reserva = reservaLibroRepository.findById(reservaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe la reserva"));
+        if (reserva.getEstadoReserva() != EstadoReserva.ACTIVA) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Solo se puede devolver una reserva activa");
+        }
+        reserva.setEstadoReserva(EstadoReserva.DEVUELTO);
+        reserva.setFechaDevolucionReal(LocalDate.now());
+
+        Libro libro = reserva.getLibro();
+        libro.setCantidadDisponible(libro.getCantidadDisponible() + 1);
+        libroRepository.save(libro);
+        return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
+    }
 }
