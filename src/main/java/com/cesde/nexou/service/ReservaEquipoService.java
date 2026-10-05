@@ -1,7 +1,4 @@
 package com.cesde.nexou.service;
-import com.cesde.nexou.dto.request.ActualizarReservaEquipoRequest;
-import com.cesde.nexou.dto.request.CrearReservaEquipoRequest;
-import com.cesde.nexou.dto.response.ReservaEquipoResponse;
 import com.cesde.nexou.exception.RecursoNoEncontradoException;
 import com.cesde.nexou.exception.ReglaDeNegocioException;
 import com.cesde.nexou.model.entity.*;
@@ -21,22 +18,25 @@ public class ReservaEquipoService {
     private final EquipoTecnologicoRepository equipoRepository;
     private final ReservaEquipoRepository reservaRepository;
 
-    public List<ReservaEquipoResponse> obtenerTodos() {
-        return reservaRepository.findAll().stream().map(ReservaEquipoResponse::desde).toList();
+    public List<ReservaEquipo> obtenerTodos() {
+        return reservaRepository.findAll();
     }
 
-    public ReservaEquipoResponse obtenerPorId(Long id) {
-        return ReservaEquipoResponse.desde(buscarReserva(id));
+    public ReservaEquipo obtenerPorId(Long id) {
+        return buscarReserva(id);
     }
 
     @Transactional
-    public ReservaEquipoResponse crear(CrearReservaEquipoRequest request) {
-        Usuario usuario = usuarioRepository.findByIdAndEstadoActivoTrue(request.getUsuarioId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario inactivo o no encontrado con id: " + request.getUsuarioId()));
+    public ReservaEquipo crear(ReservaEquipo request) {
+        validarCreacion(request);
+        Long usuarioId = request.getUsuario().getId();
+        Long equipoId = request.getEquipo().getId();
+        Usuario usuario = usuarioRepository.findByIdAndEstadoActivoTrue(usuarioId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario inactivo o no encontrado con id: " + usuarioId));
         // Regla de negocio: máximo 3 reservas activas por usuario (libros + equipos)
         validacionGlobalService.validarLimiteGlobal(usuario.getId());
-        EquipoTecnologico equipo = equipoRepository.findById(request.getEquipoId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Equipo no encontrado con id: " + request.getEquipoId()));
+        EquipoTecnologico equipo = equipoRepository.findById(equipoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Equipo no encontrado con id: " + equipoId));
 
         if (equipo.getCantidadDisponible() == null || equipo.getCantidadDisponible() <= 0) {
             throw new ReglaDeNegocioException("El equipo '" + equipo.getNomEquipo() + "' no tiene unidades disponibles");
@@ -50,20 +50,17 @@ public class ReservaEquipoService {
             throw new ReglaDeNegocioException("La reserva supera la duración máxima del equipo (" + equipo.getDuracionMaximaHrs() + " h)");
         }
 
-        ReservaEquipo reserva = new ReservaEquipo();
-        reserva.setUsuario(usuario);
-        reserva.setEquipo(equipo);
-        reserva.setHoraInicio(request.getHoraInicio());
-        reserva.setHoraFin(request.getHoraFin());
-        reserva.setEstadoReserva(EstadoReserva.ACTIVA);
+        request.setUsuario(usuario);
+        request.setEquipo(equipo);
+        request.setEstadoReserva(EstadoReserva.ACTIVA);
 
         equipo.setCantidadDisponible(equipo.getCantidadDisponible() - 1);
         equipoRepository.save(equipo);
-        return ReservaEquipoResponse.desde(reservaRepository.save(reserva));
+        return reservaRepository.save(request);
     }
 
     @Transactional
-    public ReservaEquipoResponse devolver(Long reservaId) {
+    public ReservaEquipo devolver(Long reservaId) {
         ReservaEquipo reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Reserva de equipo no encontrada con id: " + reservaId));
         if (reserva.getEstadoReserva() != EstadoReserva.ACTIVA) {
@@ -74,15 +71,15 @@ public class ReservaEquipoService {
         EquipoTecnologico equipo = reserva.getEquipo();
         equipo.setCantidadDisponible(equipo.getCantidadDisponible() + 1);
         equipoRepository.save(equipo);
-        return ReservaEquipoResponse.desde(reservaRepository.save(reserva));
+        return reservaRepository.save(reserva);
     }
 
     @Transactional
-    public ReservaEquipoResponse actualizar(Long id, ActualizarReservaEquipoRequest request) {
+    public ReservaEquipo actualizar(Long id, ReservaEquipo request) {
         ReservaEquipo reserva = buscarReserva(id);
         reserva.setLugarEntrega(request.getLugarEntrega());
         reserva.setProposito(request.getProposito());
-        return ReservaEquipoResponse.desde(reservaRepository.save(reserva));
+        return reservaRepository.save(reserva);
     }
 
     @Transactional
@@ -96,11 +93,19 @@ public class ReservaEquipoService {
     }
 
     // Uso del método personalizado del repositorio
-    public List<ReservaEquipoResponse> obtenerPorUsuarioId(Long usuarioId) {
+    public List<ReservaEquipo> obtenerPorUsuarioId(Long usuarioId) {
         if (!usuarioRepository.existsById(usuarioId)) {
             throw new RecursoNoEncontradoException("Usuario no encontrado con id: " + usuarioId);
         }
-        return reservaRepository.findByUsuarioId(usuarioId).stream().map(ReservaEquipoResponse::desde).toList();
+        return reservaRepository.findByUsuarioId(usuarioId);
+    }
+
+    private void validarCreacion(ReservaEquipo request) {
+        if (request == null || request.getUsuario() == null || request.getUsuario().getId() == null
+                || request.getEquipo() == null || request.getEquipo().getId() == null
+                || request.getHoraInicio() == null || request.getHoraFin() == null) {
+            throw new ReglaDeNegocioException("La reserva debe incluir usuario.id, equipo.id, horaInicio y horaFin");
+        }
     }
 
     private ReservaEquipo buscarReserva(Long id) {

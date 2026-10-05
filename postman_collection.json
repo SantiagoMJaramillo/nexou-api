@@ -733,7 +733,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"usuarioId\": 1,\n  \"libroId\": 2,\n  \"diasPrestamo\": 5\n}"
+              "raw": "{\n  \"usuario\": { \"id\": 1 },\n  \"libro\": { \"id\": 2 },\n  \"diasPrestamo\": 5\n}"
             }
           }
         },
@@ -831,7 +831,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/reservas-libros/1/renovacion",
+              "raw": "{{baseUrl}}/api/reservas-libros/1/renovacion?diasExtra=5",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -844,7 +844,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"diasExtra\": 5\n}"
+              "raw": ""
             }
           }
         }
@@ -910,7 +910,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"usuarioId\": 1,\n  \"equipoId\": 3,\n  \"horaInicio\": \"2026-10-06T08:00:00\",\n  \"horaFin\": \"2026-10-06T10:00:00\"\n}"
+              "raw": "{\n  \"usuario\": { \"id\": 1 },\n  \"equipo\": { \"id\": 3 },\n  \"horaInicio\": \"2026-10-06T08:00:00\",\n  \"horaFin\": \"2026-10-06T10:00:00\"\n}"
             }
           }
         },
@@ -1068,7 +1068,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"usuarioId\": 2,\n  \"libroId\": 5,\n  \"diasPrestamo\": 30\n}"
+              "raw": "{\n  \"usuario\": { \"id\": 2 },\n  \"libro\": { \"id\": 5 },\n  \"diasPrestamo\": 30\n}"
             }
           }
         },
