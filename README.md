@@ -18,9 +18,7 @@ Spring Boot · Spring Data JPA · PostgreSQL · Lombok · Maven · springdoc-ope
 src/main/java/com/cesde/nexou/
 ├── config/            (OpenApiConfig, CorsConfig, DataSeederConfig)
 ├── controller/        (7 controladores REST)
-├── dto/request/       (DTOs de entrada validados con @Valid)
-├── dto/response/      (DTOs de salida de reservas)
-├── exception/         (RecursoNoEncontradoException, ReglaDeNegocioException, GlobalExceptionHandler)
+├── exception/        (RecursoNoEncontradoException, ReglaDeNegocioException, GlobalExceptionHandler)
 ├── model/base/        (BaseEntity)
 ├── model/enums/       (EstadoReserva)
 ├── model/embeddable/  (Ubicacion)
@@ -77,6 +75,12 @@ Con la aplicación corriendo:
 
 También se incluye `postman_collection.json` con ejemplos de todas las peticiones.
 
+Las reservas usan directamente sus entidades JPA como cuerpo y respuesta JSON; no se
+requieren DTOs. Para crear una reserva de libro se envía `usuario.id`, `libro.id` y
+`diasPrestamo`. Para crear una reserva de equipo se envía `usuario.id`, `equipo.id`,
+`horaInicio` y `horaFin`. La renovación de libros recibe `diasExtra` como parámetro:
+`PATCH /api/reservas-libros/{id}/renovacion?diasExtra=5`.
+
 ## Endpoints
 
 Cada entidad tiene CRUD completo (`GET` todos, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}`) más un método personalizado:
@@ -108,7 +112,7 @@ Todas las excepciones se convierten en JSON con el formato `{"mensaje": "..."}` 
 |---|---|
 | `RecursoNoEncontradoException` | 404 Not Found |
 | `ReglaDeNegocioException` | 400 Bad Request |
-| Errores de `@Valid` en los DTOs | 400 Bad Request |
+| Errores de validación del cuerpo | 400 Bad Request |
 
 ## Datos de prueba (seed)
 

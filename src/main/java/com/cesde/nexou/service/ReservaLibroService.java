@@ -1,8 +1,4 @@
 package com.cesde.nexou.service;
-import com.cesde.nexou.dto.request.ActualizarReservaLibroRequest;
-import com.cesde.nexou.dto.request.CrearReservaLibroRequest;
-import com.cesde.nexou.dto.request.RenovarLibroRequest;
-import com.cesde.nexou.dto.response.ReservaLibroResponse;
 import com.cesde.nexou.exception.RecursoNoEncontradoException;
 import com.cesde.nexou.exception.ReglaDeNegocioException;
 import com.cesde.nexou.model.entity.*;
@@ -24,22 +20,25 @@ public class ReservaLibroService {
 
     private static final int MAX_DIAS_RENOVACION = 10;
 
-    public List<ReservaLibroResponse> obtenerTodos() {
-        return reservaLibroRepository.findAll().stream().map(ReservaLibroResponse::desde).toList();
+    public List<ReservaLibro> obtenerTodos() {
+        return reservaLibroRepository.findAll();
     }
 
-    public ReservaLibroResponse obtenerPorId(Long id) {
-        return ReservaLibroResponse.desde(buscarReserva(id));
+    public ReservaLibro obtenerPorId(Long id) {
+        return buscarReserva(id);
     }
 
     @Transactional
-    public ReservaLibroResponse crear(CrearReservaLibroRequest request) {
-        Usuario usuario = usuarioRepository.findByIdAndEstadoActivoTrue(request.getUsuarioId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario inactivo o no encontrado con id: " + request.getUsuarioId()));
+    public ReservaLibro crear(ReservaLibro request) {
+        validarCreacion(request);
+        Long usuarioId = request.getUsuario().getId();
+        Long libroId = request.getLibro().getId();
+        Usuario usuario = usuarioRepository.findByIdAndEstadoActivoTrue(usuarioId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario inactivo o no encontrado con id: " + usuarioId));
         // Regla de negocio: máximo 3 reservas activas por usuario (libros + equipos)
         validacionGlobalService.validarLimiteGlobal(usuario.getId());
-        Libro libro = libroRepository.findById(request.getLibroId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con id: " + request.getLibroId()));
+        Libro libro = libroRepository.findById(libroId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con id: " + libroId));
 
         if (libro.getCantidadDisponible() == null || libro.getCantidadDisponible() <= 0) {
             throw new ReglaDeNegocioException("El libro '" + libro.getNomLibro() + "' no tiene ejemplares disponibles");
@@ -48,19 +47,18 @@ public class ReservaLibroService {
             throw new ReglaDeNegocioException("Los días de préstamo exceden el máximo del libro (" + libro.getDiasPrestamoMax() + ")");
         }
 
-        ReservaLibro reserva = new ReservaLibro();
-        reserva.setUsuario(usuario);
-        reserva.setLibro(libro);
-        reserva.setFechaEntregaEsperada(LocalDate.now().plusDays(request.getDiasPrestamo()));
-        reserva.setEstadoReserva(EstadoReserva.ACTIVA);
+        request.setUsuario(usuario);
+        request.setLibro(libro);
+        request.setFechaEntregaEsperada(LocalDate.now().plusDays(request.getDiasPrestamo()));
+        request.setEstadoReserva(EstadoReserva.ACTIVA);
 
         libro.setCantidadDisponible(libro.getCantidadDisponible() - 1);
         libroRepository.save(libro);
-        return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
+        return reservaLibroRepository.save(request);
     }
 
     @Transactional
-    public ReservaLibroResponse devolver(Long reservaId) {
+    public ReservaLibro devolver(Long reservaId) {
         ReservaLibro reserva = reservaLibroRepository.findById(reservaId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Reserva de libro no encontrada con id: " + reservaId));
         if (reserva.getEstadoReserva() != EstadoReserva.ACTIVA) {
@@ -72,29 +70,32 @@ public class ReservaLibroService {
         Libro libro = reserva.getLibro();
         libro.setCantidadDisponible(libro.getCantidadDisponible() + 1);
         libroRepository.save(libro);
-        return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
+        return reservaLibroRepository.save(reserva);
     }
 
     @Transactional
-    public ReservaLibroResponse renovar(Long reservaId, RenovarLibroRequest request) {
+    public ReservaLibro renovar(Long reservaId, Integer diasExtra) {
         ReservaLibro reserva = reservaLibroRepository.findById(reservaId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Reserva de libro no encontrada con id: " + reservaId));
         if (reserva.getEstadoReserva() != EstadoReserva.ACTIVA) {
             throw new ReglaDeNegocioException("Solo las reservas activas se pueden renovar");
         }
-        if (request.getDiasExtra() > MAX_DIAS_RENOVACION) {
+        if (diasExtra == null || diasExtra <= 0) {
+            throw new ReglaDeNegocioException("Los días extra deben ser positivos");
+        }
+        if (diasExtra > MAX_DIAS_RENOVACION) {
             throw new ReglaDeNegocioException("No se puede renovar por más de " + MAX_DIAS_RENOVACION + " días extra");
         }
-        reserva.setFechaEntregaEsperada(reserva.getFechaEntregaEsperada().plusDays(request.getDiasExtra()));
-        return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
+        reserva.setFechaEntregaEsperada(reserva.getFechaEntregaEsperada().plusDays(diasExtra));
+        return reservaLibroRepository.save(reserva);
     }
 
     @Transactional
-    public ReservaLibroResponse actualizar(Long id, ActualizarReservaLibroRequest request) {
+    public ReservaLibro actualizar(Long id, ReservaLibro request) {
         ReservaLibro reserva = buscarReserva(id);
         reserva.setTipoPrestamo(request.getTipoPrestamo());
         reserva.setProposito(request.getProposito());
-        return ReservaLibroResponse.desde(reservaLibroRepository.save(reserva));
+        return reservaLibroRepository.save(reserva);
     }
 
     @Transactional
@@ -108,11 +109,19 @@ public class ReservaLibroService {
     }
 
     // Uso del método personalizado del repositorio
-    public List<ReservaLibroResponse> obtenerPorUsuarioId(Long usuarioId) {
+    public List<ReservaLibro> obtenerPorUsuarioId(Long usuarioId) {
         if (!usuarioRepository.existsById(usuarioId)) {
             throw new RecursoNoEncontradoException("Usuario no encontrado con id: " + usuarioId);
         }
-        return reservaLibroRepository.findByUsuarioId(usuarioId).stream().map(ReservaLibroResponse::desde).toList();
+        return reservaLibroRepository.findByUsuarioId(usuarioId);
+    }
+
+    private void validarCreacion(ReservaLibro request) {
+        if (request == null || request.getUsuario() == null || request.getUsuario().getId() == null
+                || request.getLibro() == null || request.getLibro().getId() == null
+                || request.getDiasPrestamo() == null || request.getDiasPrestamo() <= 0) {
+            throw new ReglaDeNegocioException("La reserva debe incluir usuario.id, libro.id y diasPrestamo positivo");
+        }
     }
 
     private ReservaLibro buscarReserva(Long id) {

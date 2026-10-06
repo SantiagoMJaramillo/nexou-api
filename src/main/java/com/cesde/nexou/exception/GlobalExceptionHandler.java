@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
     }
 
-    // Errores de @Valid en los DTOs de entrada: se devuelven con el mismo formato
+    // Errores de validación de los cuerpos de entrada.
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> manejarValidacion(MethodArgumentNotValidException ex) {
         String detalle = ex.getBindingResult().getFieldErrors().stream()
