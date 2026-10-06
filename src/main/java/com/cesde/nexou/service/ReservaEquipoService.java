@@ -52,6 +52,8 @@ public class ReservaEquipoService {
 
         request.setUsuario(usuario);
         request.setEquipo(equipo);
+        // La entrega se espera el mismo día en que termina la reserva
+        request.setFechaEntregaEsperada(request.getHoraFin().toLocalDate());
         request.setEstadoReserva(EstadoReserva.ACTIVA);
 
         equipo.setCantidadDisponible(equipo.getCantidadDisponible() - 1);
