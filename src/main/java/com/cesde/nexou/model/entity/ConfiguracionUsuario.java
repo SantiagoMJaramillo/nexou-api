@@ -24,7 +24,7 @@ public class ConfiguracionUsuario extends BaseEntity {
     private Boolean notificacionesActivas = true;
 
     @OneToOne
-    @JsonIgnoreProperties("configuracionUsuario")
+    @JsonIgnoreProperties(value = "configuracionUsuario", allowSetters = true)
     @JoinColumn(name = "usuario_id", nullable = false, unique = true)
     private Usuario usuario;
 }
