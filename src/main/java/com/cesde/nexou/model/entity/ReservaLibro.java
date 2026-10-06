@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -28,9 +29,11 @@ public class ReservaLibro extends BaseEntity {
     @Transient
     private Integer diasPrestamo;
 
+    @Size(max = 30, message = "no puede superar los 30 caracteres")
     @Column(name = "tipo_prestamo", length = 30)
     private String tipoPrestamo;
 
+    @Size(max = 150, message = "no puede superar los 150 caracteres")
     @Column(length = 150)
     private String proposito;
 

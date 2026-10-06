@@ -18,6 +18,7 @@ import com.cesde.nexou.service.CategoriaService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Categorías", description = "Categorías temáticas de los libros y búsqueda por nombre")
@@ -42,13 +43,13 @@ public class CategoriaController {
 
     @Operation(summary = "Crear una categoría")
     @PostMapping
-    public ResponseEntity<Categoria> crear(@RequestBody Categoria categoria) {
+    public ResponseEntity<Categoria> crear(@Valid @RequestBody Categoria categoria) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.crear(categoria));
     }
 
     @Operation(summary = "Actualizar una categoría por su ID")
     @PutMapping("/{id}")
-    public ResponseEntity<Categoria> actualizar(@PathVariable Long id, @RequestBody Categoria categoria) {
+    public ResponseEntity<Categoria> actualizar(@PathVariable Long id, @Valid @RequestBody Categoria categoria) {
         return ResponseEntity.ok(categoriaService.actualizar(id, categoria));
     }
 
