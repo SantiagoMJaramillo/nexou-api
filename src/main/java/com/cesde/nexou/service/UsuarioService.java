@@ -45,6 +45,11 @@ public class UsuarioService {
         if (usuario.getConfiguracionUsuario() != null) {
             usuario.getConfiguracionUsuario().setUsuario(usuario);
         }
+        // Un POST siempre crea un registro nuevo: se ignora cualquier id recibido en el body
+        usuario.setId(null);
+        if (usuario.getConfiguracionUsuario() != null) {
+            usuario.getConfiguracionUsuario().setId(null);
+        }
         return usuarioRepository.save(usuario);
     }
 
