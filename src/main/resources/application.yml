@@ -2,6 +2,10 @@
   application:
     name: nexou
 
+  # Carga las variables del archivo .env local (si existe)
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
