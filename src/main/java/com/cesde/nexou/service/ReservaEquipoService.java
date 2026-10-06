@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -44,6 +45,10 @@ public class ReservaEquipoService {
         if (!request.getHoraFin().isAfter(request.getHoraInicio())) {
             throw new ReglaDeNegocioException("La hora de fin debe ser posterior a la hora de inicio");
         }
+        // Regla de negocio: no se reservan equipos para un horario que ya pasó
+        if (request.getHoraInicio().isBefore(LocalDateTime.now())) {
+            throw new ReglaDeNegocioException("La hora de inicio no puede estar en el pasado");
+        }
         // Se compara en minutos: toHours() trunca (2h59m contaría como 2h)
         long minutos = Duration.between(request.getHoraInicio(), request.getHoraFin()).toMinutes();
         if (equipo.getDuracionMaximaHrs() != null && minutos > equipo.getDuracionMaximaHrs() * 60) {
@@ -52,6 +57,8 @@ public class ReservaEquipoService {
 
         request.setUsuario(usuario);
         request.setEquipo(equipo);
+        // La entrega se espera el mismo día en que termina la reserva
+        request.setFechaEntregaEsperada(request.getHoraFin().toLocalDate());
         request.setEstadoReserva(EstadoReserva.ACTIVA);
 
         equipo.setCantidadDisponible(equipo.getCantidadDisponible() - 1);
