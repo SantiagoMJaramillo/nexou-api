@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -31,9 +32,11 @@ public class ReservaEquipo extends BaseEntity {
     @Column(name = "hora_fin")
     private LocalDateTime horaFin;
 
+    @Size(max = 100, message = "no puede superar los 100 caracteres")
     @Column(name = "lugar_entrega", length = 100)
     private String lugarEntrega;
 
+    @Size(max = 150, message = "no puede superar los 150 caracteres")
     @Column(length = 150)
     private String proposito;
 
