@@ -54,6 +54,8 @@ public class ReservaLibroService {
 
         libro.setCantidadDisponible(libro.getCantidadDisponible() - 1);
         libroRepository.save(libro);
+        // Un POST siempre crea un registro nuevo: se ignora cualquier id recibido en el body
+        request.setId(null);
         return reservaLibroRepository.save(request);
     }
 
