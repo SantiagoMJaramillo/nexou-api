@@ -34,6 +34,8 @@ public class CategoriaService {
         if (categoriaRepository.findByNombreIgnoreCase(categoria.getNombre()).isPresent()) {
             throw new ReglaDeNegocioException("Ya existe una categoría con el nombre: " + categoria.getNombre());
         }
+        // Un POST siempre crea un registro nuevo: se ignora cualquier id recibido en el body
+        categoria.setId(null);
         return categoriaRepository.save(categoria);
     }
 

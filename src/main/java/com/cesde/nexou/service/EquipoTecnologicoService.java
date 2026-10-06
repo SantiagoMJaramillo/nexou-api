@@ -37,6 +37,8 @@ public class EquipoTecnologicoService {
             equipo.setCantidadDisponible(equipo.getCantidadTotal());
         }
         validarInventario(equipo);
+        // Un POST siempre crea un registro nuevo: se ignora cualquier id recibido en el body
+        equipo.setId(null);
         return equipoRepository.save(equipo);
     }
 
