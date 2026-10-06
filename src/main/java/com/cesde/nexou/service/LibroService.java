@@ -47,6 +47,8 @@ public class LibroService {
         }
         validarInventario(libro);
         libro.setCategorias(resolverCategorias(libro.getCategorias()));
+        // Un POST siempre crea un registro nuevo: se ignora cualquier id recibido en el body
+        libro.setId(null);
         return libroRepository.save(libro);
     }
 

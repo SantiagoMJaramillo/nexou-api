@@ -63,6 +63,8 @@ public class ReservaEquipoService {
 
         equipo.setCantidadDisponible(equipo.getCantidadDisponible() - 1);
         equipoRepository.save(equipo);
+        // Un POST siempre crea un registro nuevo: se ignora cualquier id recibido en el body
+        request.setId(null);
         return reservaRepository.save(request);
     }
 
