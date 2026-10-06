@@ -18,6 +18,7 @@ import com.cesde.nexou.service.LibroService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Libros", description = "Catálogo de libros de la biblioteca y búsqueda por ISBN")
@@ -42,13 +43,13 @@ public class LibroController {
 
     @Operation(summary = "Crear un libro", description = "Las categorías se envían por ID: \"categorias\": [{\"id\": 1}]")
     @PostMapping
-    public ResponseEntity<Libro> crear(@RequestBody Libro libro) {
+    public ResponseEntity<Libro> crear(@Valid @RequestBody Libro libro) {
         return ResponseEntity.status(HttpStatus.CREATED).body(libroService.crear(libro));
     }
 
     @Operation(summary = "Actualizar un libro por su ID")
     @PutMapping("/{id}")
-    public ResponseEntity<Libro> actualizar(@PathVariable Long id, @RequestBody Libro libro) {
+    public ResponseEntity<Libro> actualizar(@PathVariable Long id, @Valid @RequestBody Libro libro) {
         return ResponseEntity.ok(libroService.actualizar(id, libro));
     }
 
