@@ -11,10 +11,16 @@
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    # Pool de conexiones (Neon/Supabase free tier: pocas conexiones)
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 30000
 
   jpa:
     hibernate:
       ddl-auto: update
+    open-in-view: false
     show-sql: true
     properties:
       hibernate:
