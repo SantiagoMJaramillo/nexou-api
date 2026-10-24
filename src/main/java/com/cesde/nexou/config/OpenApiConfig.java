@@ -22,7 +22,7 @@ import io.swagger.v3.oas.models.info.License;
 public class OpenApiConfig {
 
     @Bean
-    public OpenAPI customOpenAPI() {
+    OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
                         .title("NEXOU API - Reservas de biblioteca y equipos tecnológicos")

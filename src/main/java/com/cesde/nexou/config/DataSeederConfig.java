@@ -33,7 +33,7 @@ import com.cesde.nexou.repository.UsuarioRepository;
 public class DataSeederConfig {
 
     @Bean
-    public CommandLineRunner sembrarDatos(CategoriaRepository categoriaRepository,
+    CommandLineRunner sembrarDatos(CategoriaRepository categoriaRepository,
                                           LibroRepository libroRepository,
                                           UsuarioRepository usuarioRepository,
                                           EquipoTecnologicoRepository equipoRepository,
