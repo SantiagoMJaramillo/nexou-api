@@ -18,6 +18,7 @@ import com.cesde.nexou.service.ConfiguracionUsuarioService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Configuración de usuario", description = "Preferencias del usuario (idioma, tema, notificaciones)")
@@ -42,13 +43,13 @@ public class ConfiguracionUsuarioController {
 
     @Operation(summary = "Crear la configuración de un usuario", description = "Body de ejemplo: {\"idioma\":\"es\",\"tema\":\"oscuro\",\"notificacionesActivas\":true,\"usuario\":{\"id\":1}}")
     @PostMapping
-    public ResponseEntity<ConfiguracionUsuario> crear(@RequestBody ConfiguracionUsuario configuracion) {
+    public ResponseEntity<ConfiguracionUsuario> crear(@Valid @RequestBody ConfiguracionUsuario configuracion) {
         return ResponseEntity.status(HttpStatus.CREATED).body(configuracionService.crear(configuracion));
     }
 
     @Operation(summary = "Actualizar una configuración por su ID")
     @PutMapping("/{id}")
-    public ResponseEntity<ConfiguracionUsuario> actualizar(@PathVariable Long id, @RequestBody ConfiguracionUsuario configuracion) {
+    public ResponseEntity<ConfiguracionUsuario> actualizar(@PathVariable Long id, @Valid @RequestBody ConfiguracionUsuario configuracion) {
         return ResponseEntity.ok(configuracionService.actualizar(id, configuracion));
     }
 

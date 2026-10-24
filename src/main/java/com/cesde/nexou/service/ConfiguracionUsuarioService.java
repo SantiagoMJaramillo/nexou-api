@@ -44,6 +44,8 @@ public class ConfiguracionUsuarioService {
             throw new ReglaDeNegocioException("El usuario con id " + usuarioId + " ya tiene una configuración. Use PUT para modificarla");
         }
         configuracion.setUsuario(usuario);
+        // Un POST siempre crea un registro nuevo: se ignora cualquier id recibido en el body
+        configuracion.setId(null);
         return configuracionRepository.save(configuracion);
     }
 

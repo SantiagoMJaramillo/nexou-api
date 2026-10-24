@@ -38,12 +38,17 @@ public class UsuarioService {
             throw new ReglaDeNegocioException("La contraseña es obligatoria");
         }
         // Regla de negocio: no permitir dos usuarios con el mismo correo
-        if (usuarioRepository.findByCorreo(usuario.getCorreo()).isPresent()) {
+        if (usuarioRepository.findByCorreoIgnoreCase(usuario.getCorreo()).isPresent()) {
             throw new ReglaDeNegocioException("Ya existe un usuario con el correo: " + usuario.getCorreo());
         }
         // Si viene la configuración en el mismo JSON, se enlaza con el usuario (cascade ALL)
         if (usuario.getConfiguracionUsuario() != null) {
             usuario.getConfiguracionUsuario().setUsuario(usuario);
+        }
+        // Un POST siempre crea un registro nuevo: se ignora cualquier id recibido en el body
+        usuario.setId(null);
+        if (usuario.getConfiguracionUsuario() != null) {
+            usuario.getConfiguracionUsuario().setId(null);
         }
         return usuarioRepository.save(usuario);
     }
@@ -55,7 +60,7 @@ public class UsuarioService {
 
         // Regla de negocio: si cambia el correo, el nuevo no puede estar ocupado
         if (!datosUsuario.getCorreo().equalsIgnoreCase(usuario.getCorreo())
-                && usuarioRepository.findByCorreo(datosUsuario.getCorreo()).isPresent()) {
+                && usuarioRepository.findByCorreoIgnoreCase(datosUsuario.getCorreo()).isPresent()) {
             throw new ReglaDeNegocioException("El correo " + datosUsuario.getCorreo() + " ya está en uso por otro usuario");
         }
 
@@ -87,7 +92,7 @@ public class UsuarioService {
 
     // Uso del método personalizado del repositorio
     public Usuario obtenerPorCorreo(String correo) {
-        return usuarioRepository.findByCorreo(correo)
+        return usuarioRepository.findByCorreoIgnoreCase(correo)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con correo: " + correo));
     }
 

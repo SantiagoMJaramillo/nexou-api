@@ -18,6 +18,7 @@ import com.cesde.nexou.service.EquipoTecnologicoService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Equipos tecnológicos", description = "Inventario de equipos para préstamo y consulta de disponibles")
@@ -42,13 +43,13 @@ public class EquipoTecnologicoController {
 
     @Operation(summary = "Crear un equipo")
     @PostMapping
-    public ResponseEntity<EquipoTecnologico> crear(@RequestBody EquipoTecnologico equipo) {
+    public ResponseEntity<EquipoTecnologico> crear(@Valid @RequestBody EquipoTecnologico equipo) {
         return ResponseEntity.status(HttpStatus.CREATED).body(equipoService.crear(equipo));
     }
 
     @Operation(summary = "Actualizar un equipo por su ID")
     @PutMapping("/{id}")
-    public ResponseEntity<EquipoTecnologico> actualizar(@PathVariable Long id, @RequestBody EquipoTecnologico equipo) {
+    public ResponseEntity<EquipoTecnologico> actualizar(@PathVariable Long id, @Valid @RequestBody EquipoTecnologico equipo) {
         return ResponseEntity.ok(equipoService.actualizar(id, equipo));
     }
 

@@ -20,6 +20,7 @@ import com.cesde.nexou.service.ValidacionGlobalService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Usuarios", description = "Gestión de usuarios (estudiantes) y búsqueda por correo")
@@ -45,13 +46,13 @@ public class UsuarioController {
 
     @Operation(summary = "Crear un usuario (opcionalmente con su configuración)")
     @PostMapping
-    public ResponseEntity<Usuario> crear(@RequestBody Usuario usuario) {
+    public ResponseEntity<Usuario> crear(@Valid @RequestBody Usuario usuario) {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.crear(usuario));
     }
 
     @Operation(summary = "Actualizar un usuario por su ID")
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @Valid @RequestBody Usuario usuario) {
         return ResponseEntity.ok(usuarioService.actualizar(id, usuario));
     }
 

@@ -2,6 +2,9 @@ package com.cesde.nexou.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
+import com.scalar.maven.webmvc.ScalarWebMvcAutoConfiguration;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -11,8 +14,11 @@ import io.swagger.v3.oas.models.info.License;
 /**
  * Información general de la API que se muestra en Swagger UI (/swagger-ui.html)
  * y en Scalar (/scalar).
+ * Se importa la configuración de Scalar de forma explícita porque Spring Boot 4
+ * no la detecta automáticamente y /scalar respondía 404.
  */
 @Configuration
+@Import(ScalarWebMvcAutoConfiguration.class)
 public class OpenApiConfig {
 
     @Bean
