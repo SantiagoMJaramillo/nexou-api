@@ -129,5 +129,5 @@ Todas las excepciones se convierten en JSON con el formato `{"mensaje": "..."}` 
 ./mvnw clean compile
 ```
 
-Requiere Java 21 y variables de entorno `DB_URL`, `DB_USER`, `DB_PASSWORD` para la conexión a PostgreSQL.
+Requiere Java 25 (LTS) y variables de entorno `DB_URL`, `DB_USER`, `DB_PASSWORD` para la conexión a PostgreSQL.
 Para desarrollo local basta con copiar `.env.template` como `.env` y completar esos valores: la aplicación lo carga al arrancar (el archivo está en `.gitignore`).
