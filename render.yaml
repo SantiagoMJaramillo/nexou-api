@@ -1,0 +1,25 @@
+# Blueprint de Render para la API de NEXOU (Docker).
+# Las variables con sync: false se piden al crear el servicio; nunca se suben al repositorio.
+services:
+  - type: web
+    name: nexou-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DB_URL
+        sync: false          # jdbc:postgresql://HOST/DB?sslmode=require
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true  # Render genera un secreto aleatorio seguro
+      - key: ADMIN_USER
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ORIGENES
+        sync: false          # URL de Vercel, ej: https://nexou.vercel.app
+      - key: APP_TIMEZONE
+        value: America/Bogota
