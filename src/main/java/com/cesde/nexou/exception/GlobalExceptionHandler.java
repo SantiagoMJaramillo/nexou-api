@@ -37,6 +37,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(respuesta);
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, String>> manejarArchivoGrande(org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("mensaje", "La imagen supera el máximo de 1 MB"));
+    }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<Map<String, String>> manejarCredenciales(CredencialesInvalidasException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("mensaje", ex.getMessage()));
+    }
+
+    // Recurso de otro usuario, o falta de rol (@PreAuthorize lanza AuthorizationDeniedException)
+    @ExceptionHandler({AccesoDenegadoException.class, org.springframework.security.access.AccessDeniedException.class})
+    public ResponseEntity<Map<String, String>> manejarAccesoDenegado(RuntimeException ex) {
+        String mensaje = ex instanceof AccesoDenegadoException ? ex.getMessage() : "No tienes permiso para esta acción";
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("mensaje", mensaje));
+    }
+
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<Map<String, String>> manejarNoAutenticado(org.springframework.security.core.AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("mensaje", "Debes iniciar sesión"));
+    }
+
     @ExceptionHandler(ReglaDeNegocioException.class)
     public ResponseEntity<Map<String, String>> manejarReglaDeNegocio(ReglaDeNegocioException ex) {
         Map<String, String> respuesta = new HashMap<>();

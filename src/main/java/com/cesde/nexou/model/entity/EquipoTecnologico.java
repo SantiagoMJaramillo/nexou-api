@@ -46,4 +46,9 @@ public class EquipoTecnologico extends BaseEntity {
     @Size(max = 30, message = "no puede superar los 30 caracteres")
     @Column(name = "estado_equipo", length = 30)
     private String estadoEquipo;
+
+    // Marca de tiempo de la última imagen subida; null si no tiene. Va en la URL para refrescar el caché
+    @Column(name = "imagen_version")
+    private Long imagenVersion;
+
 }

@@ -39,6 +39,9 @@ public class ReservaEquipoService {
         EquipoTecnologico equipo = equipoRepository.findById(equipoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Equipo no encontrado con id: " + equipoId));
 
+        if (!Boolean.TRUE.equals(equipo.getEstadoActivo())) {
+            throw new ReglaDeNegocioException("El equipo '" + equipo.getNomEquipo() + "' no está disponible para préstamo");
+        }
         if (equipo.getCantidadDisponible() == null || equipo.getCantidadDisponible() <= 0) {
             throw new ReglaDeNegocioException("El equipo '" + equipo.getNomEquipo() + "' no tiene unidades disponibles");
         }
@@ -76,6 +79,7 @@ public class ReservaEquipoService {
             throw new ReglaDeNegocioException("Solo se puede devolver una reserva activa");
         }
         reserva.setEstadoReserva(EstadoReserva.DEVUELTO);
+        reserva.setFechaDevolucionReal(LocalDateTime.now());
 
         EquipoTecnologico equipo = reserva.getEquipo();
         equipo.setCantidadDisponible(equipo.getCantidadDisponible() + 1);
