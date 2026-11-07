@@ -1,6 +1,7 @@
 package com.cesde.nexou.model.entity;
 
 import com.cesde.nexou.model.base.BaseEntity;
+import com.cesde.nexou.model.enums.Rol;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -17,11 +18,11 @@ import lombok.NoArgsConstructor;
 public class Usuario extends BaseEntity {
 
     @Size(max = 100, message = "no puede superar los 100 caracteres")
-    @Column(name = "nombre_usuario", nullable = false, length = 100)
+    @Column(name = "nombre_usuario", nullable = false, unique = true, length = 100)
     private String nombreUsuario;
 
     @Size(max = 150, message = "no puede superar los 150 caracteres")
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(unique = true, length = 150)
     private String correo;
 
     // Solo se recibe en las peticiones; nunca se devuelve en las respuestas JSON
@@ -39,6 +40,11 @@ public class Usuario extends BaseEntity {
     private String programa;
 
     private Integer semestre;
+
+    // Rol de acceso. Si en la base de datos viene vacío se trata como USER
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Rol rol = Rol.USER;
 
     @Size(max = 20, message = "no puede superar los 20 caracteres")
     @Column(length = 20)
