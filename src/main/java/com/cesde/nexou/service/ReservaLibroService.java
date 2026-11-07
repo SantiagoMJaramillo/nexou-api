@@ -40,6 +40,9 @@ public class ReservaLibroService {
         Libro libro = libroRepository.findById(libroId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Libro no encontrado con id: " + libroId));
 
+        if (!Boolean.TRUE.equals(libro.getEstadoActivo())) {
+            throw new ReglaDeNegocioException("El libro '" + libro.getNomLibro() + "' no está disponible para préstamo");
+        }
         if (libro.getCantidadDisponible() == null || libro.getCantidadDisponible() <= 0) {
             throw new ReglaDeNegocioException("El libro '" + libro.getNomLibro() + "' no tiene ejemplares disponibles");
         }

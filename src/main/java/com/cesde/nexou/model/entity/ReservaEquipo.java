@@ -32,6 +32,10 @@ public class ReservaEquipo extends BaseEntity {
     @Column(name = "hora_fin")
     private LocalDateTime horaFin;
 
+    // Momento real de la devolución; permite saber si se devolvió tarde (hora_fin = límite)
+    @Column(name = "fecha_devolucion_real")
+    private LocalDateTime fechaDevolucionReal;
+
     @Size(max = 100, message = "no puede superar los 100 caracteres")
     @Column(name = "lugar_entrega", length = 100)
     private String lugarEntrega;

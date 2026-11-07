@@ -24,6 +24,7 @@ public class LibroService {
     private final LibroRepository libroRepository;
     private final CategoriaRepository categoriaRepository;
     private final ReservaLibroRepository reservaLibroRepository;
+    private final com.cesde.nexou.repository.ImagenArticuloRepository imagenArticuloRepository;
 
     public List<Libro> obtenerTodos() {
         return libroRepository.findAll();
@@ -71,6 +72,9 @@ public class LibroService {
         }
         libro.setDiasPrestamoMax(datos.getDiasPrestamoMax());
         libro.setUbicacionFisica(datos.getUbicacionFisica());
+        if (datos.getEstadoActivo() != null) {
+            libro.setEstadoActivo(datos.getEstadoActivo());
+        }
         validarInventario(libro);
 
         // Las categorías solo se reemplazan si se envían en el JSON
@@ -87,6 +91,7 @@ public class LibroService {
         if (reservaLibroRepository.existsByLibroId(id)) {
             throw new ReglaDeNegocioException("No se puede eliminar el libro porque tiene reservas registradas. Desactívelo (estadoActivo = false)");
         }
+        imagenArticuloRepository.deleteByTipoAndArticuloId(ImagenService.LIBRO, id);
         libroRepository.delete(libro);
     }
 

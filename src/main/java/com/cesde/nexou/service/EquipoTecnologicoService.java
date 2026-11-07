@@ -19,6 +19,7 @@ public class EquipoTecnologicoService {
 
     private final EquipoTecnologicoRepository equipoRepository;
     private final ReservaEquipoRepository reservaEquipoRepository;
+    private final com.cesde.nexou.repository.ImagenArticuloRepository imagenArticuloRepository;
 
     public List<EquipoTecnologico> obtenerTodos() {
         return equipoRepository.findAll();
@@ -57,6 +58,9 @@ public class EquipoTecnologicoService {
         }
         equipo.setDuracionMaximaHrs(datos.getDuracionMaximaHrs());
         equipo.setEstadoEquipo(datos.getEstadoEquipo());
+        if (datos.getEstadoActivo() != null) {
+            equipo.setEstadoActivo(datos.getEstadoActivo());
+        }
         validarInventario(equipo);
         return equipoRepository.save(equipo);
     }
@@ -68,6 +72,7 @@ public class EquipoTecnologicoService {
         if (reservaEquipoRepository.existsByEquipoId(id)) {
             throw new ReglaDeNegocioException("No se puede eliminar el equipo porque tiene reservas registradas. Desactívelo (estadoActivo = false)");
         }
+        imagenArticuloRepository.deleteByTipoAndArticuloId(ImagenService.EQUIPO, id);
         equipoRepository.delete(equipo);
     }
 

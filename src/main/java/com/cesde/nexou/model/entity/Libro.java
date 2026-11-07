@@ -45,11 +45,15 @@ public class Libro extends BaseEntity {
     @Column(name = "dias_prestamo_max")
     private Integer diasPrestamoMax;
 
+    // Marca de tiempo de la última imagen subida; null si no tiene. Va en la URL para refrescar el caché
+    @Column(name = "imagen_version")
+    private Long imagenVersion;
+
     @Valid
     @Embedded
     private Ubicacion ubicacionFisica;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnoreProperties("libros")
     @JoinTable(
         name = "libro_categoria",

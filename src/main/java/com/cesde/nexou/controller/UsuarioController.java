@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cesde.nexou.model.entity.Usuario;
+import com.cesde.nexou.dto.UsuarioDto;
 import com.cesde.nexou.service.UsuarioService;
 import com.cesde.nexou.service.ValidacionGlobalService;
 
@@ -23,10 +24,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@Tag(name = "Usuarios", description = "Gestión de usuarios (estudiantes) y búsqueda por correo")
+@Tag(name = "Usuarios", description = "Gestión de usuarios (solo ADMIN)")
 @RestController
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -34,26 +36,27 @@ public class UsuarioController {
 
     @Operation(summary = "Listar todos los usuarios")
     @GetMapping
-    public List<Usuario> obtenerTodos() {
-        return usuarioService.obtenerTodos();
+    public List<UsuarioDto.Response> obtenerTodos() {
+        return usuarioService.obtenerTodos().stream().map(UsuarioDto.Response::de).toList();
     }
 
     @Operation(summary = "Obtener un usuario por su ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(usuarioService.obtenerPorId(id));
+    public UsuarioDto.Response obtenerPorId(@PathVariable Long id) {
+        return UsuarioDto.Response.de(usuarioService.obtenerPorId(id));
     }
 
-    @Operation(summary = "Crear un usuario (opcionalmente con su configuración)")
+    @Operation(summary = "Crear un usuario (puede ser otro administrador)")
     @PostMapping
-    public ResponseEntity<Usuario> crear(@Valid @RequestBody Usuario usuario) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.crear(usuario));
+    public ResponseEntity<UsuarioDto.Response> crear(@Valid @RequestBody UsuarioDto.Request datos) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(UsuarioDto.Response.de(usuarioService.crear(datos.aEntidad())));
     }
 
-    @Operation(summary = "Actualizar un usuario por su ID")
+    @Operation(summary = "Actualizar un usuario (rol, estado, datos de perfil)")
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @Valid @RequestBody Usuario usuario) {
-        return ResponseEntity.ok(usuarioService.actualizar(id, usuario));
+    public UsuarioDto.Response actualizar(@PathVariable Long id, @Valid @RequestBody UsuarioDto.Request datos) {
+        return UsuarioDto.Response.de(usuarioService.actualizar(id, datos.aEntidad()));
     }
 
     @Operation(summary = "Eliminar un usuario sin reservas registradas")
@@ -63,18 +66,17 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-    // Método personalizado: buscar usuario por correo
     @Operation(summary = "Buscar un usuario por su correo")
     @GetMapping("/correo/{correo}")
-    public ResponseEntity<Usuario> obtenerPorCorreo(@PathVariable String correo) {
-        return ResponseEntity.ok(usuarioService.obtenerPorCorreo(correo));
+    public UsuarioDto.Response obtenerPorCorreo(@PathVariable String correo) {
+        return UsuarioDto.Response.de(usuarioService.obtenerPorCorreo(correo));
     }
 
     @Operation(summary = "Validar si el usuario puede hacer más reservas (máximo 3 activas)")
     @GetMapping("/{id}/validar-limite")
-    public ResponseEntity<Map<String, String>> validarLimite(@PathVariable Long id) {
+    public Map<String, String> validarLimite(@PathVariable Long id) {
         usuarioService.obtenerPorId(id);
         validacionGlobalService.validarLimiteGlobal(id);
-        return ResponseEntity.ok(Map.of("mensaje", "El usuario es apto para más préstamos."));
+        return Map.of("mensaje", "El usuario es apto para más préstamos.");
     }
 }

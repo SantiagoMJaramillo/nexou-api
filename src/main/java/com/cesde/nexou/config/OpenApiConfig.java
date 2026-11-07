@@ -24,6 +24,11 @@ public class OpenApiConfig {
     @Bean
     OpenAPI customOpenAPI() {
         return new OpenAPI()
+                .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement().addList("bearer"))
+                .components(new io.swagger.v3.oas.models.Components().addSecuritySchemes("bearer",
+                        new io.swagger.v3.oas.models.security.SecurityScheme()
+                                .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                                .scheme("bearer").bearerFormat("JWT")))
                 .info(new Info()
                         .title("NEXOU API - Reservas de biblioteca y equipos tecnológicos")
                         .version("1.0.0")
